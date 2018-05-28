@@ -1,19 +1,19 @@
-module.exports = function(grunt) {
+module.exports = function (grunt) {
 
 	grunt.initConfig({
 		bower: {
 			install: {
-			  options: {
-				copy: false,
-				targetDir: './lib',
-				layout: 'byType',
-				install: true,
-				verbose: false,
-				prune: false,
-				cleanTargetDir: false,
-				cleanBowerDir: false,
-				bowerOptions: {}
-			  }
+				options: {
+					copy: false,
+					targetDir: './lib',
+					layout: 'byType',
+					install: true,
+					verbose: false,
+					prune: false,
+					cleanTargetDir: false,
+					cleanBowerDir: false,
+					bowerOptions: {}
+				}
 			}
 		},
 
@@ -37,53 +37,78 @@ module.exports = function(grunt) {
 				dest: 'html/css'
 			}
 		},
-		
+
 		concat: {
-			  dist: {
-				src: ['html/dist/bootstrap/css/bootstrap.css','html/dist/bootstrap/css/bootstrap-grid.css'],
+			dist: {
+				src: ['html/dist/bootstrap/css/bootstrap.css', 'html/dist/bootstrap/css/bootstrap-grid.css'],
 				dest: 'html/css/style.css'
-			  },
-			  options: {
+			},
+			options: {
 				separator: ';'
-			  }
+			}
 		},
 
 		uglify: {
-			options: {
-			  mangle: false
-			},
 			my_target: {
-			  files: {
-				'html/css/style.min.css': 'html/css/style.css'
-			  }
-			}
+				options: {
+				},
+				files: {
+					'html/js/jquery.min.js': ['html/dist/jquery/jquery.js'],
+				},
+			},
 		},
-		compass: { 
-			dist: {        
-			  options: {            
-				sassDir: 'sass',
-				cssDir: 'html/css'			  
-			}
+		compass: {
+			dist: {
+				options: {
+					sassDir: 'sass',
+					cssDir: 'html/css'
+				}
 			},
 			dev: {
-			  options: {
-				sassDir: 'sass',
-				cssDir: 'html/css'
-			  }
+				options: {
+					sassDir: 'sass',
+					cssDir: 'html/css'
+				}
 			}
 		},
 
 		cssmin: {
 			target: {
-			  files: [{
-				expand: true,
-				cwd: 'html/css',
-				src: ['*.css', '!*.min.css'],
-				dest: 'html/css',
-				ext: '.min.css'
-			  }]
+				files: [{
+					expand: true,
+					cwd: 'html/css',
+					src: ['*.css', '!*.min.css'],
+					dest: 'html/css',
+					ext: '.min.css'
+				}]
 			}
-		  }
+		},
+		adjust_sourcemaps: {
+			options: {
+				process: function (json, sourceMapGenerator, sourceMapConsumer, sourceMapPackage) {
+					return json || sourceMapGenerator;
+				}
+			},
+			your_target: {
+				files: [{
+					expand: true,
+					src: 'html/dist/jquery/*.*.map',
+					dest: 'html/js/map'
+				}]
+			}
+		},
+		auto_install: {
+			local: {},
+			subdir: {
+				options: {
+					cwd: 'subdir',
+					stdout: true,
+					stderr: true,
+					failOnError: true,
+					npm: '--production'
+				}
+			}
+		},
 	});
 
 
@@ -93,6 +118,8 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-contrib-concat');
 	grunt.loadNpmTasks('grunt-contrib-cssmin');
-	grunt.registerTask('default', ['bower','concat','copy','cssmin','uglify']);
+	grunt.loadNpmTasks('grunt-adjust-sourcemaps');
+	grunt.loadNpmTasks('grunt-auto-install');
 
+	grunt.registerTask('default', ['bower','concat','copy','cssmin','uglify','adjust_sourcemaps','auto_install']);
 }
